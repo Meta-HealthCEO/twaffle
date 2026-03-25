@@ -1,0 +1,17 @@
+{
+  "name": "Twaffle - Catch Deals in the Wild",
+  "short_name": "Twaffle",
+  "description": "Discover amazing local deals on an interactive map",
+  "start_url": "/map",
+  "display": "standalone",
+  "background_color": "#0F172A",
+  "theme_color": "#7C3AED",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
