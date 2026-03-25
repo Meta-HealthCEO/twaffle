@@ -94,3 +94,43 @@ body {
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(124, 58, 237, 0.3);
 }
+
+/* Flash deal pin pulse - red urgent */
+@keyframes flash-pulse {
+  0% { transform: translate(-50%, -70%) scale(0.5); opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { transform: translate(-50%, -70%) scale(2.5); opacity: 0; }
+}
+
+.flash-pin::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #EF4444;
+  animation: flash-pulse 1s ease-out infinite;
+  transform-origin: center;
+}
+
+/* Spin glow effect for nav */
+@keyframes spin-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(124, 58, 237, 0.4), 0 0 16px rgba(124, 58, 237, 0.2); }
+  50% { box-shadow: 0 0 16px rgba(124, 58, 237, 0.8), 0 0 32px rgba(124, 58, 237, 0.4); }
+}
+
+.spin-glow {
+  animation: spin-glow 2s ease-in-out infinite;
+}
+
+/* Flash badge pulse */
+@keyframes badge-flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.flash-badge {
+  animation: badge-flash 1s ease-in-out infinite;
+}

@@ -7,7 +7,8 @@ import "leaflet/dist/leaflet.css";
 import { deals, categories, categoryColors, type Deal, type Category } from "@/data/mock";
 import { DealCard } from "./DealCard";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Filter, Zap } from "lucide-react";
+import { X, Filter, Zap, ExternalLink } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 function createPinIcon(category: Category) {
   const color = categoryColors[category];
@@ -32,6 +33,38 @@ function createPinIcon(category: Category) {
   });
 }
 
+function createFlashPinIcon() {
+  const color = "#EF4444";
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 62" width="48" height="62">
+      <defs>
+        <filter id="flash-shadow" x="-30%" y="-15%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="${color}" flood-opacity="0.7"/>
+        </filter>
+        <filter id="flash-glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feFlood flood-color="${color}" flood-opacity="0.6"/>
+          <feComposite in2="blur" operator="in"/>
+          <feMerge>
+            <feMergeNode/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      <path d="M24 0C13.507 0 5 8.507 5 19c0 14.4 19 38.4 19 38.4s19-24 19-38.4C43 8.507 34.493 0 24 0z" fill="${color}" filter="url(#flash-shadow)"/>
+      <circle cx="24" cy="19" r="10" fill="#0F172A"/>
+      <path d="M26.5 12L20 20.5h4.5L22 27l7-8.5h-4.5L26.5 12z" fill="${color}" filter="url(#flash-glow)"/>
+    </svg>
+  `;
+  return L.divIcon({
+    html: `<div class="flash-pin" style="position:relative">${svg}</div>`,
+    className: "",
+    iconSize: [48, 62],
+    iconAnchor: [24, 62],
+    popupAnchor: [0, -62],
+  });
+}
+
 function FlyToLocation({ lat, lng }: { lat: number; lng: number }) {
   const map = useMap();
   useEffect(() => {
@@ -47,10 +80,16 @@ export function MapViewComponent() {
   const [claimed, setClaimed] = useState<Set<string>>(new Set());
   const [flyTo, setFlyTo] = useState<{ lat: number; lng: number } | null>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const router = useRouter();
 
   const filteredDeals = activeFilters.length > 0
     ? deals.filter((d) => activeFilters.includes(d.category))
     : deals;
+
+  // Separate regular and flash deals so flash deals render on top
+  const regularDeals = filteredDeals.filter((d) => !d.isFlash);
+  const flashDeals = filteredDeals.filter((d) => d.isFlash);
+  const flashCount = flashDeals.length;
 
   const toggleFilter = (cat: Category) => {
     setActiveFilters((prev) =>
@@ -77,11 +116,27 @@ export function MapViewComponent() {
           attribution=""
         />
         {flyTo && <FlyToLocation lat={flyTo.lat} lng={flyTo.lng} />}
-        {filteredDeals.map((deal) => (
+        {/* Regular deals rendered first (below flash deals) */}
+        {regularDeals.map((deal) => (
           <Marker
             key={deal.id}
             position={[deal.lat, deal.lng]}
             icon={createPinIcon(deal.category)}
+            eventHandlers={{
+              click: () => {
+                setSelectedDeal(deal);
+                setFlyTo({ lat: deal.lat, lng: deal.lng });
+              },
+            }}
+          />
+        ))}
+        {/* Flash deals rendered last (on top) */}
+        {flashDeals.map((deal) => (
+          <Marker
+            key={deal.id}
+            position={[deal.lat, deal.lng]}
+            icon={createFlashPinIcon()}
+            zIndexOffset={1000}
             eventHandlers={{
               click: () => {
                 setSelectedDeal(deal);
@@ -97,6 +152,15 @@ export function MapViewComponent() {
         <div className="flex-1 glass rounded-2xl px-4 py-3 flex items-center gap-2">
           <Zap size={18} className="text-accent" />
           <span className="text-sm font-medium">{filteredDeals.length} deals nearby</span>
+          {flashCount > 0 && (
+            <>
+              <span className="mx-1 text-gray-600">|</span>
+              <Zap size={14} className="text-red-500 fill-red-500" />
+              <span className="text-sm font-semibold text-red-400">
+                {flashCount} flash {flashCount === 1 ? "deal" : "deals"}
+              </span>
+            </>
+          )}
         </div>
         <button
           onClick={() => setShowFilters(!showFilters)}
@@ -155,6 +219,17 @@ export function MapViewComponent() {
               deal={selectedDeal}
               onClaim={() => handleClaim(selectedDeal.id)}
             />
+            {/* View Deal detail link */}
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              onClick={() => router.push(`/deal/${selectedDeal.id}`)}
+              className="w-full mt-2 glass rounded-2xl py-3 px-4 flex items-center justify-center gap-2 text-sm font-semibold text-primary-light hover:bg-primary/20 transition-colors"
+            >
+              <ExternalLink size={16} />
+              View Deal Details
+            </motion.button>
             {claimed.has(selectedDeal.id) && (
               <motion.div
                 initial={{ scale: 0 }}
