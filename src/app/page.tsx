@@ -172,11 +172,43 @@ export default function LandingPage() {
         </motion.button>
 
         <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.5 }}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={() => router.push("/spin")}
+          className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold py-4 rounded-2xl text-lg shadow-lg shadow-yellow-500/25 mb-4 cursor-pointer"
+        >
+          🎰 Spin {"&"} Win Prizes
+        </motion.button>
+
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.6 }}
+          transition={{ delay: 1.7 }}
+          className="flex gap-4 w-full"
+        >
+          <button
+            onClick={() => router.push("/treasure-hunt")}
+            className="flex-1 glass text-white font-semibold py-3 rounded-2xl text-sm cursor-pointer hover:bg-white/10 transition-colors"
+          >
+            🗺️ Treasure Hunts
+          </button>
+          <button
+            onClick={() => router.push("/shop")}
+            className="flex-1 glass text-white font-semibold py-3 rounded-2xl text-sm cursor-pointer hover:bg-white/10 transition-colors"
+          >
+            🪙 Buy Coins
+          </button>
+        </motion.div>
+
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.8 }}
           onClick={() => router.push("/dashboard")}
-          className="text-gray-400 text-sm hover:text-white transition-colors cursor-pointer"
+          className="text-gray-400 text-sm hover:text-white transition-colors cursor-pointer mt-4"
         >
           I&apos;m a business &rarr;
         </motion.button>
